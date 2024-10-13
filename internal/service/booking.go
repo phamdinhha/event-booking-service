@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/phamdinhha/event-booking-service/internal/model"
 	"github.com/phamdinhha/event-booking-service/internal/repository"
 	"github.com/phamdinhha/event-booking-service/pkg/logger"
+	"github.com/redis/go-redis/v9"
 )
 
 type BookingService struct {
