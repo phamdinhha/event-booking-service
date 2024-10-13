@@ -9,8 +9,18 @@ import (
 
 // App config struct
 type Config struct {
-	Server  ServerConfig `mapstructure:"server"`
-	Logger  Logger       `mapstructure:"logger"`
+	Server   ServerConfig   `mapstructure:"server"`
+	Logger   Logger         `mapstructure:"logger"`
+	Postgres PostgresConfig `mapstructure:"postgres"`
+}
+
+type PostgresConfig struct {
+	Driver   string `mapstructure:"driver"`
+	Host     string `mapstructure:"host"`
+	Port     string `mapstructure:"port"`
+	User     string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
+	Database string `mapstructure:"database"`
 }
 
 // Server config struct
