@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/phamdinhha/event-booking-service/internal/model"
 	"github.com/phamdinhha/event-booking-service/pkg/logger"

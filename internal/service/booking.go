@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"github.com/phamdinhha/event-booking-service/internal/model"
 	"github.com/phamdinhha/event-booking-service/internal/repository"
 	"github.com/phamdinhha/event-booking-service/pkg/logger"
