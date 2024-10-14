@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"github.com/phamdinhha/event-booking-service/internal/dto"
 	"github.com/phamdinhha/event-booking-service/internal/model"
 )
