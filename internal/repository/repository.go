@@ -8,7 +8,7 @@ import (
 )
 
 type BookingRepositoryInterface interface {
-	CreateBooking(ctx context.Context, booking *model.Booking) error
+	CreateBooking(ctx context.Context, booking *model.Booking) (*model.Booking, error)
 	GetBookingByID(ctx context.Context, id uuid.UUID) (*model.Booking, error)
 	UpdateBooking(ctx context.Context, booking *model.Booking) error
 	DeleteBooking(ctx context.Context, id uuid.UUID) error

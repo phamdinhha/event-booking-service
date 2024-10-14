@@ -25,17 +25,33 @@ func NewBookingRepository(db *sqlx.DB, logger logger.Logger) BookingRepositoryIn
 	}
 }
 
-func (r *BookingRepository) CreateBooking(ctx context.Context, booking *model.Booking) error {
+func (r *BookingRepository) CreateBooking(
+	ctx context.Context,
+	booking *model.Booking,
+) (*model.Booking, error) {
+	tx, err := r.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	updateEventQuery := `
+		UPDATE events SET available_tickets = available_tickets - $1 WHERE id = $2"
+	`
+
+	_, err = tx.ExecContext(ctx, updateEventQuery,
+		booking.Quantity,
+		booking.EventID,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to update available tickets: %w", err)
+	}
+
 	query := `
 		INSERT INTO bookings (id, event_id, user_id, status, quantity, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
-
-	tx, err := r.db.BeginTxx(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
-	}
-
 	_, err = tx.ExecContext(ctx, query,
 		booking.ID,
 		booking.EventID,
@@ -48,16 +64,16 @@ func (r *BookingRepository) CreateBooking(ctx context.Context, booking *model.Bo
 
 	if err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {
-			return fmt.Errorf("failed to rollback: %v (original error: %w)", rbErr, err)
+			return nil, fmt.Errorf("failed to rollback: %v (original error: %w)", rbErr, err)
 		}
-		return fmt.Errorf("failed to create booking: %w", err)
+		return nil, fmt.Errorf("failed to create booking: %w", err)
 	}
 
 	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	return nil
+	return booking, nil
 }
 
 func (r *BookingRepository) GetBookingByID(ctx context.Context, id uuid.UUID) (*model.Booking, error) {
