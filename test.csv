@@ -1,0 +1,22 @@
+Theoretical frameworks,Reference,Methodology,Results,Limitations
+"Technology Acceptance Model (TAM), Perceived Risk Theory (PRT)","Featherman, M.S., & Pavlou, P.A. (2003). Predicting e-services adoption: a perceived risk facets perspective. Int. J. Human-Computer Studies, 59, 451-474.","Two computer lab usability tests using vendor shopping trial demo software for e-billpay services
+Sample 1: N=214
+Sample 2: N=181
+Undergraduate business students
+25-minute ""shopping trial"" using interactive demo software
+Paper and pencil survey after trial using 7-point Likert and semantic differential scales
+Structural equation modeling (SEM) using AMOS
+Confirmatory factor analysis (CFA)
+Context: Internet-based bill payment services (EBPP or e-billpay)","Perceived risk reduced perceived usefulness and adoption intention
+Performance, financial, privacy, and time risk were most salient facets
+Social risk was not salient for this context
+Perceived ease of use significantly reduced perceived risks of usage
+Privacy risk emerged as an important inhibitor to system evaluation and adoption
+Evidence for a second-order composite perceived risk variable
+Evidence for a risk facet hierarchy with performance risk as foundation
+Perceived ease of use primarily reduces performance risk concerns","Small sample sizes for SEM (sample to indicant ratios of 14.2:1 and 12.1:1)
+Moderate collinearity among risk facets, contributing to indicant cross-loadings
+Sample was younger, more educated, with higher computing skills than general population
+Used original TAM, not TAM2 (2000 version)
+Did not distinguish between risks attributable to Internet medium vs. e-service provider
+Further scale development needed for increasingly divergent risk facet operationalizations"

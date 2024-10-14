@@ -6,33 +6,66 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-redis/redis/v8"
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
+	"github.com/phamdinhha/event-booking-service/internal/dto"
 	"github.com/phamdinhha/event-booking-service/internal/model"
 	"github.com/phamdinhha/event-booking-service/internal/repository"
 	"github.com/phamdinhha/event-booking-service/pkg/logger"
+	"github.com/redis/go-redis/v9"
 )
 
 type BookingService struct {
 	bookingRepo repository.BookingRepositoryInterface
 	logger      logger.Logger
-	cache       *redis.Client
+	redis       *redis.Client
 }
 
-func NewBookingService(bookingRepo repository.BookingRepositoryInterface, logger logger.Logger, cache *redis.Client) *BookingService {
+func NewBookingService(
+	bookingRepo repository.BookingRepositoryInterface,
+	logger logger.Logger,
+	redis *redis.Client,
+) *BookingService {
 	return &BookingService{
 		bookingRepo: bookingRepo,
 		logger:      logger,
-		cache:       cache,
+		redis:       redis,
 	}
 }
 
-func (s *BookingService) CreateBooking(ctx context.Context, booking *model.Booking) error {
-	if err := s.bookingRepo.CreateBooking(ctx, booking); err != nil {
-		return fmt.Errorf("failed to create booking: %w", err)
+func (s *BookingService) CreateBooking(
+	ctx context.Context,
+	bookDTO *dto.CreateBookingDTO,
+) (*dto.BookingDTO, error) {
+	holdKey := fmt.Sprintf("hold:event:%s:user:%s", bookDTO.EventID.String(), bookDTO.UserID.String())
+	heldTickets, err := s.redis.Get(ctx, holdKey).Int()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get held tickets: %w", err)
+	}
+
+	booking := &model.Booking{
+		EventID:   bookDTO.EventID,
+		UserID:    bookDTO.UserID,
+		Quantity:  heldTickets,
+		Status:    "confirmed",
+		CreatedAt: time.Now(),
+	}
+
+	createdBooking, err := s.bookingRepo.CreateBooking(ctx, booking)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create booking: %w", err)
 	}
 	s.cacheBooking(ctx, booking)
-	return nil
+	// Release the hold
+	s.redis.Del(ctx, holdKey)
+	return &dto.BookingDTO{
+		ID:        createdBooking.ID,
+		EventID:   createdBooking.EventID,
+		UserID:    createdBooking.UserID,
+		Quantity:  createdBooking.Quantity,
+		Status:    createdBooking.Status,
+		CreatedAt: createdBooking.CreatedAt,
+		UpdatedAt: createdBooking.UpdatedAt,
+	}, nil
 }
 
 func (s *BookingService) GetBooking(ctx context.Context, id uuid.UUID) (*model.Booking, error) {
@@ -84,14 +117,14 @@ func (s *BookingService) cacheBooking(ctx context.Context, booking *model.Bookin
 		s.logger.Error("failed to marshal booking for caching", "error", err)
 		return
 	}
-	err = s.cache.Set(ctx, fmt.Sprintf("booking:%s", booking.ID), bookingJSON, time.Hour).Err()
+	err = s.redis.Set(ctx, fmt.Sprintf("booking:%s", booking.ID), bookingJSON, time.Hour).Err()
 	if err != nil {
 		s.logger.Error("failed to cache booking", "error", err)
 	}
 }
 
 func (s *BookingService) getCachedBooking(ctx context.Context, id uuid.UUID) (*model.Booking, error) {
-	bookingJSON, err := s.cache.Get(ctx, fmt.Sprintf("booking:%s", id)).Result()
+	bookingJSON, err := s.redis.Get(ctx, fmt.Sprintf("booking:%s", id)).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +139,7 @@ func (s *BookingService) getCachedBooking(ctx context.Context, id uuid.UUID) (*m
 }
 
 func (s *BookingService) invalidateCache(ctx context.Context, id uuid.UUID) {
-	err := s.cache.Del(ctx, fmt.Sprintf("booking:%s", id)).Err()
+	err := s.redis.Del(ctx, fmt.Sprintf("booking:%s", id)).Err()
 	if err != nil {
 		s.logger.Error("failed to invalidate booking cache", "error", err)
 	}
