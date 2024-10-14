@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/phamdinhha/event-booking-service/config"
 	"github.com/phamdinhha/event-booking-service/pkg/logger"
@@ -32,32 +33,37 @@ func NewServer(
 }
 
 func (s *Server) Run(ctx context.Context) (shutdown utils.Deamon, err error) {
-	var (
-		srvAddr = fmt.Sprintf("%s:%s", s.cfg.Server.Host, s.cfg.Server.Port)
-	)
-	// handlers := handlers.NewHandlers(s.logger, s.redis)
+	srvAddr := fmt.Sprintf("%s:%s", s.cfg.Server.Host, s.cfg.Server.Port)
 
+	// handlers := handlers.NewHandlers(s.logger, s.redis)
 	server := &http.Server{
 		Addr: srvAddr,
-		// Handler: handlers
+		// Handler: handlers,
 	}
-	s.logger.Info("Server is running on", srvAddr)
 
+	// Create a context that will be canceled on interrupt signal
+	ctx, stop := signal.NotifyContext(ctx, os.Interrupt)
+	defer stop()
+
+	// Start the server in a goroutine
 	go func() {
+		s.logger.Info("Server is running on " + srvAddr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			s.logger.Fatal("Server is not running", err)
+			s.logger.Error("Server failed to start", "error", err)
 		}
 	}()
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
-	<-quit
+	// Wait for interrupt signal
+	<-ctx.Done()
 	s.logger.Info("Server is shutting down")
 
+	// Create a timeout context for graceful shutdown
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	shutdown = func() {
-		<-ctx.Done()
-		if err := server.Shutdown(ctx); err != nil {
-			s.logger.Fatal("Server is not shutting down", err)
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			s.logger.Error("Server shutdown failed", "error", err)
 		}
 	}
 
