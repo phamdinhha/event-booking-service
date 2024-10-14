@@ -22,7 +22,7 @@ func NewEventService(
 	eventRepo repository.EventRepositoryInterface,
 	logger logger.Logger,
 	redis *redis.Client,
-) *EventServiceInterface {
+) EventServiceInterface {
 	return &EventService{
 		eventRepo: eventRepo,
 		logger:    logger,
