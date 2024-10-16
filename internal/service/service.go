@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/phamdinhha/event-booking-service/internal/dto"
-	"github.com/phamdinhha/event-booking-service/internal/model"
 )
 
 type BookingServiceInterface interface {
-	CreateBooking(ctx context.Context, booking model.Booking) error
-	GetBooking(ctx context.Context, id uuid.UUID) (model.Booking, error)
+	CreateBooking(ctx context.Context, booking *dto.CreateBookingDTO) (*dto.BookingDTO, error)
+	GetBooking(ctx context.Context, id uuid.UUID) (*dto.BookingDTO, error)
+	DeleteBooking(ctx context.Context, id uuid.UUID) error
 }
 
 type EventServiceInterface interface {
