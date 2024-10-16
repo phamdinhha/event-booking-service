@@ -24,7 +24,7 @@ func NewBookingService(
 	bookingRepo repository.BookingRepositoryInterface,
 	logger logger.Logger,
 	redis *redis.Client,
-) *BookingService {
+) BookingServiceInterface {
 	return &BookingService{
 		bookingRepo: bookingRepo,
 		logger:      logger,
@@ -68,11 +68,19 @@ func (s *BookingService) CreateBooking(
 	}, nil
 }
 
-func (s *BookingService) GetBooking(ctx context.Context, id uuid.UUID) (*model.Booking, error) {
+func (s *BookingService) GetBooking(ctx context.Context, id uuid.UUID) (*dto.BookingDTO, error) {
 	// Try to get from cache first
 	cachedBooking, err := s.getCachedBooking(ctx, id)
 	if err == nil {
-		return cachedBooking, nil
+		return &dto.BookingDTO{
+			ID:        cachedBooking.ID,
+			EventID:   cachedBooking.EventID,
+			UserID:    cachedBooking.UserID,
+			Quantity:  cachedBooking.Quantity,
+			Status:    cachedBooking.Status,
+			CreatedAt: cachedBooking.CreatedAt,
+			UpdatedAt: cachedBooking.UpdatedAt,
+		}, nil
 	}
 	// If not in cache, get from database
 	booking, err := s.bookingRepo.GetBookingByID(ctx, id)
@@ -82,7 +90,15 @@ func (s *BookingService) GetBooking(ctx context.Context, id uuid.UUID) (*model.B
 	// Cache the booking for future requests
 	s.cacheBooking(ctx, booking)
 
-	return booking, nil
+	return &dto.BookingDTO{
+		ID:        booking.ID,
+		EventID:   booking.EventID,
+		UserID:    booking.UserID,
+		Quantity:  booking.Quantity,
+		Status:    booking.Status,
+		CreatedAt: booking.CreatedAt,
+		UpdatedAt: booking.UpdatedAt,
+	}, nil
 }
 
 func (s *BookingService) UpdateBooking(ctx context.Context, booking *model.Booking) error {
