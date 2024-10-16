@@ -74,13 +74,11 @@ func (s *BookingService) GetBooking(ctx context.Context, id uuid.UUID) (*model.B
 	if err == nil {
 		return cachedBooking, nil
 	}
-
 	// If not in cache, get from database
 	booking, err := s.bookingRepo.GetBookingByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get booking: %w", err)
 	}
-
 	// Cache the booking for future requests
 	s.cacheBooking(ctx, booking)
 

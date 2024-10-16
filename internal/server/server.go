@@ -29,11 +29,13 @@ func NewServer(
 	logger logger.Logger,
 	cfg *config.Config,
 	redis *redis.Client,
+	db *sqlx.DB,
 ) *Server {
 	return &Server{
 		logger: logger,
 		cfg:    cfg,
 		redis:  redis,
+		db:     db,
 	}
 }
 
@@ -71,7 +73,6 @@ func (s *Server) Run(ctx context.Context) (shutdown utils.Deamon, err error) {
 			s.logger.Error("Server shutdown failed", "error", err)
 		}
 	}
-
 	return shutdown, nil
 }
 

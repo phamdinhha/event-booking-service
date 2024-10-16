@@ -1,0 +1,5 @@
+./data/*
+*.csv
+event-booking-service
+data/*
+test_new.go

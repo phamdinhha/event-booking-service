@@ -12,6 +12,7 @@ type Config struct {
 	Server   ServerConfig   `mapstructure:"server"`
 	Logger   Logger         `mapstructure:"logger"`
 	Postgres PostgresConfig `mapstructure:"postgres"`
+	Redis    RedisConfig    `mapstructure:"redis"`
 }
 
 type PostgresConfig struct {
@@ -21,6 +22,13 @@ type PostgresConfig struct {
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
 	Database string `mapstructure:"database"`
+}
+
+type RedisConfig struct {
+	Host     string `mapstructure:"host"`
+	Port     string `mapstructure:"port"`
+	Password string `mapstructure:"password"`
+	DB       int    `mapstructure:"db"`
 }
 
 // Server config struct
@@ -96,6 +104,20 @@ func GetEnvConfig() (*Config, error) {
 		Logger: Logger{
 			Encoding: v.GetString("LOGGER_ENCODING"),
 			Level:    v.GetString("LOGGER_LEVEL"),
+		},
+		Postgres: PostgresConfig{
+			Host:     v.GetString("POSTGRES_HOST"),
+			Port:     v.GetString("POSTGRES_PORT"),
+			User:     v.GetString("POSTGRES_USER"),
+			Password: v.GetString("POSTGRES_PASSWORD"),
+			Database: v.GetString("POSTGRES_DATABASE"),
+			Driver:   v.GetString("POSTGRES_DRIVER"),
+		},
+		Redis: RedisConfig{
+			Host:     v.GetString("REDIS_HOST"),
+			Port:     v.GetString("REDIS_PORT"),
+			Password: v.GetString("REDIS_PASSWORD"),
+			DB:       v.GetInt("REDIS_DB"),
 		},
 	}, nil
 }
