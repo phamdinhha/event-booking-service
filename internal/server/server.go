@@ -10,7 +10,9 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 	"github.com/phamdinhha/event-booking-service/config"
+	"github.com/phamdinhha/event-booking-service/internal/delivery/http_v1"
 	"github.com/phamdinhha/event-booking-service/pkg/logger"
 	"github.com/phamdinhha/event-booking-service/pkg/utils"
 	"github.com/redis/go-redis/v9"
@@ -20,6 +22,7 @@ type Server struct {
 	logger logger.Logger
 	cfg    *config.Config
 	redis  *redis.Client
+	db     *sqlx.DB
 }
 
 func NewServer(
@@ -85,9 +88,12 @@ func (s *Server) SetupHandlers() *gin.Engine {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
+	s.MapHandlers(ginEngine)
 	return ginEngine
 }
 
 func (s *Server) MapHandlers(ginEngine *gin.Engine) {
-
+	healthCheckController := http_v1.NewHealthCheckController(s.logger, s.redis, s.db)
+	healthCheckGroup := ginEngine.Group("/health")
+	http_v1.MapHealthCheckRoutes(healthCheckGroup, healthCheckController)
 }
