@@ -9,10 +9,11 @@ import (
 
 // App config struct
 type Config struct {
-	Server   ServerConfig   `mapstructure:"server"`
-	Logger   Logger         `mapstructure:"logger"`
-	Postgres PostgresConfig `mapstructure:"postgres"`
-	Redis    RedisConfig    `mapstructure:"redis"`
+	Server     ServerConfig     `mapstructure:"server"`
+	Logger     Logger           `mapstructure:"logger"`
+	Postgres   PostgresConfig   `mapstructure:"postgres"`
+	Redis      RedisConfig      `mapstructure:"redis"`
+	Migrations MigrationsConfig `mapstructure:"migrations"`
 }
 
 type PostgresConfig struct {
@@ -22,6 +23,10 @@ type PostgresConfig struct {
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
 	Database string `mapstructure:"database"`
+}
+
+type MigrationsConfig struct {
+	Path string `mapstructure:"path"`
 }
 
 type RedisConfig struct {
