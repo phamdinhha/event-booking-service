@@ -24,8 +24,11 @@ services:
   redis:
     container_name: redis
     image: redis:6
+    command: redis-server --requirepass redis_pass
     ports:
       - "6379:6379"
     volumes:
       - ./data/redis:/data
     restart: on-failure
+    environment:
+      - REDIS_PASSWORD=redis_pass
