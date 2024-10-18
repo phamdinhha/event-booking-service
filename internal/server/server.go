@@ -94,7 +94,16 @@ func (s *Server) SetupHandlers() *gin.Engine {
 }
 
 func (s *Server) MapHandlers(ginEngine *gin.Engine) {
-	healthCheckController := http_v1.NewHealthCheckController(s.logger, s.redis, s.db)
+	factory := http_v1.NewControllerFactory(s.db, s.logger, s.redis)
+	healthCheckController := factory.NewHealthCheckController()
 	healthCheckGroup := ginEngine.Group("/health")
 	http_v1.MapHealthCheckRoutes(healthCheckGroup, healthCheckController)
+
+	bookingController := factory.NewBookingController()
+	bookingGroup := ginEngine.Group("/bookings")
+	http_v1.MapBookingRoutes(bookingGroup, bookingController)
+
+	eventController := factory.NewEventController()
+	eventGroup := ginEngine.Group("/events")
+	http_v1.MapEventRoutes(eventGroup, eventController)
 }
