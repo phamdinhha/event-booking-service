@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 
+	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
@@ -96,6 +97,8 @@ func GetConfig(configPath string) (*Config, error) {
 }
 
 func GetEnvConfig() (*Config, error) {
+	_ = godotenv.Load()
+
 	v := viper.New()
 	v.AutomaticEnv()
 	return &Config{
@@ -123,6 +126,9 @@ func GetEnvConfig() (*Config, error) {
 			Port:     v.GetString("REDIS_PORT"),
 			Password: v.GetString("REDIS_PASSWORD"),
 			DB:       v.GetInt("REDIS_DB"),
+		},
+		Migrations: MigrationsConfig{
+			Path: v.GetString("MIGRATIONS_PATH"),
 		},
 	}, nil
 }

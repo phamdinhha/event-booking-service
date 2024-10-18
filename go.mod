@@ -11,6 +11,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/jmoiron/sqlx v1.4.0
+	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/spf13/viper v1.19.0
 	go.uber.org/zap v1.27.0

@@ -34,6 +34,9 @@ RUN apk update && apk add bash && apk --no-cache add tzdata
 
 COPY --from=builder ["/build/event-booking-service", "event-booking-service"]
 COPY --from=builder ["/build/config", "config"]
-COPY --from=builder ["/build/database", "database"]
+COPY --from=builder ["/build/migrations", "migrations"]
 
 CMD ["./event-booking-service"]
+
+# docker build -t haphamd/event-booking:test -f build/Dockerfile .
+# docker run -it --net=host --env-file .env haphamd/event-booking:test
