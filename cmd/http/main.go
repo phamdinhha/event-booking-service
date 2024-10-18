@@ -43,6 +43,11 @@ func main() {
 		appLogger.Fatalf("Error connecting to db: %v", err)
 	}
 
+	// Run migrations
+	if err := postgres.RunMigrations(db, cfg.Migrations.Path); err != nil {
+		appLogger.Fatalf("Error running migrations: %v", err)
+	}
+
 	redisClient := redis_client.NewRedisClient(cfg)
 	if err := redisClient.Ping(context.TODO()).Err(); err != nil {
 		appLogger.Fatalf("Error connecting to redis: %v", err)
