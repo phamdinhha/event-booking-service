@@ -13,6 +13,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/phamdinhha/event-booking-service/config"
 	"github.com/phamdinhha/event-booking-service/internal/delivery/http_v1"
+	"github.com/phamdinhha/event-booking-service/internal/repository"
+	"github.com/phamdinhha/event-booking-service/internal/service"
 	"github.com/phamdinhha/event-booking-service/pkg/logger"
 	"github.com/phamdinhha/event-booking-service/pkg/utils"
 	"github.com/redis/go-redis/v9"
@@ -97,4 +99,16 @@ func (s *Server) MapHandlers(ginEngine *gin.Engine) {
 	healthCheckController := http_v1.NewHealthCheckController(s.logger, s.redis, s.db)
 	healthCheckGroup := ginEngine.Group("/health")
 	http_v1.MapHealthCheckRoutes(healthCheckGroup, healthCheckController)
+
+	bookingRepo := repository.NewBookingRepository(s.db, s.logger)
+	bookingSrv := service.NewBookingService(bookingRepo, s.logger, s.redis)
+	bookingController := http_v1.NewBookingController(s.logger, bookingSrv)
+	bookingGroup := ginEngine.Group("/bookings")
+	http_v1.MapBookingRoutes(bookingGroup, bookingController)
+
+	eventRepo := repository.NewEventRepository(s.db, s.logger)
+	eventSrv := service.NewEventService(eventRepo, s.logger, s.redis)
+	eventController := http_v1.NewEventController(s.logger, eventSrv)
+	eventGroup := ginEngine.Group("/events")
+	http_v1.MapEventRoutes(eventGroup, eventController)
 }

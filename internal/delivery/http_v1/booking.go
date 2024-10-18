@@ -52,7 +52,6 @@ func (b *BookingController) GetBooking(c *gin.Context) {
 		return
 	}
 
-	// Call the service to get the booking
 	booking, err := b.bookingSrv.GetBooking(c.Request.Context(), id)
 	if err != nil {
 		b.logger.Error("BOOKING_CONTROLLER.GET_BOOKING.Error", err)

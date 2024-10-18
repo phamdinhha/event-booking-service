@@ -11,3 +11,10 @@ type BookingControllerInterface interface {
 type HealthCheckInterface interface {
 	GetHealthCheck(c *gin.Context)
 }
+
+// Controller for testing data, should be in another service
+type EventControllerInterface interface {
+	CreateEvent(c *gin.Context)
+	GetEvent(c *gin.Context)
+	DeleteEvent(c *gin.Context)
+}

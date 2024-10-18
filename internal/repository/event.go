@@ -7,14 +7,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/phamdinhha/event-booking-service/internal/model"
+	"github.com/phamdinhha/event-booking-service/pkg/logger"
 )
 
 type EventRepository struct {
-	db *sqlx.DB
+	db     *sqlx.DB
+	logger logger.Logger
 }
 
-func NewEventRepository(db *sqlx.DB) EventRepositoryInterface {
-	return &EventRepository{db: db}
+func NewEventRepository(db *sqlx.DB, logger logger.Logger) EventRepositoryInterface {
+	return &EventRepository{db: db, logger: logger}
 }
 
 func (r *EventRepository) CreateEvent(ctx context.Context, event *model.Event) error {
@@ -25,6 +27,7 @@ func (r *EventRepository) CreateEvent(ctx context.Context, event *model.Event) e
 
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
+		r.logger.Error("EVENT_REPOSITORY.CREATE_EVENT.Error", err)
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 
@@ -42,12 +45,14 @@ func (r *EventRepository) CreateEvent(ctx context.Context, event *model.Event) e
 
 	if err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {
+			r.logger.Error("EVENT_REPOSITORY.CREATE_EVENT.Error", rbErr)
 			return fmt.Errorf("failed to rollback: %v (original error: %w)", rbErr, err)
 		}
 		return fmt.Errorf("failed to create event: %w", err)
 	}
 
 	if err := tx.Commit(); err != nil {
+		r.logger.Error("EVENT_REPOSITORY.CREATE_EVENT.Error", err)
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
@@ -64,6 +69,7 @@ func (r *EventRepository) GetEventByID(ctx context.Context, id uuid.UUID) (*mode
 	var event model.Event
 	err := r.db.GetContext(ctx, &event, query, id)
 	if err != nil {
+		r.logger.Error("EVENT_REPOSITORY.GET_EVENT_BY_ID.Error", err)
 		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
 
@@ -79,6 +85,7 @@ func (r *EventRepository) UpdateEvent(ctx context.Context, event *model.Event) e
 
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
+		r.logger.Error("EVENT_REPOSITORY.UPDATE_EVENT.Error", err)
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 
@@ -95,12 +102,15 @@ func (r *EventRepository) UpdateEvent(ctx context.Context, event *model.Event) e
 
 	if err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {
+			r.logger.Error("EVENT_REPOSITORY.UPDATE_EVENT.Error", rbErr)
 			return fmt.Errorf("failed to rollback: %v (original error: %w)", rbErr, err)
 		}
+		r.logger.Error("EVENT_REPOSITORY.UPDATE_EVENT.Error", err)
 		return fmt.Errorf("failed to update event: %w", err)
 	}
 
 	if err := tx.Commit(); err != nil {
+		r.logger.Error("EVENT_REPOSITORY.UPDATE_EVENT.Error", err)
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
@@ -112,18 +122,22 @@ func (r *EventRepository) DeleteEvent(ctx context.Context, id uuid.UUID) error {
 
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
+		r.logger.Error("EVENT_REPOSITORY.DELETE_EVENT.Error", err)
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 
 	_, err = tx.ExecContext(ctx, query, id)
 	if err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {
+			r.logger.Error("EVENT_REPOSITORY.DELETE_EVENT.Error", rbErr)
 			return fmt.Errorf("failed to rollback: %v (original error: %w)", rbErr, err)
 		}
+		r.logger.Error("EVENT_REPOSITORY.DELETE_EVENT.Error", err)
 		return fmt.Errorf("failed to delete event: %w", err)
 	}
 
 	if err := tx.Commit(); err != nil {
+		r.logger.Error("EVENT_REPOSITORY.DELETE_EVENT.Error", err)
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
