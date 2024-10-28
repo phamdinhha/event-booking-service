@@ -118,4 +118,5 @@ Total Peak IOPS: ~506 IOPS
    - Capable of handling 100 Mbps traffic
 
 ## Architecture
+![Architecture](./docs/event-booking-platform.drawio.png)
 
