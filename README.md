@@ -117,6 +117,24 @@ Total Peak IOPS: ~506 IOPS
    - 2 instances for redundancy
    - Capable of handling 100 Mbps traffic
 
-## Architecture
+## Architecture - High level design
+### Architecture
 ![Architecture](./docs/event-booking-platform.drawio.png)
+- Public users: a user can search and book event tickets
+- Admin or private users: can manage events, users, and platform configurations
+- CDN or content delivery network: serve static content to users, reduce load on application servers by caching static content
+- Public API Gateway / Load balancer: fully managed service that support routing, authentication, rate limiting, etc
+- Internal API: APIs that only available for authorized or admin users. They can only be accessed through private network or VPN
+- We will use the microservice architecture for the booking system. Each service will be responsible for a specific feature or functionality.
+    - Authentication/authorization service: manage user accounts, roles, and permissions
+    - Event service: manage events and detailed information for each event
+    - Booking service: manage booking, cancellation, and other booking related operations
+    - Payment service: integrate with payment gateway to handle payment processing
+    - Notification service: send notifications to users before the event takes place, notification can be sent via email or SMS
+    - Management service: manage the platform, users, and events. When admin makes changes via management console, these changes will be pushed to the actual service that owns the data. For example, when admin changes the event information, the change will be pushed to the event service.
 
+### API Design
+Booking APIs
+### Data model
+
+## Concurrency issues when booking tickets
