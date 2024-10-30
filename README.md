@@ -133,8 +133,32 @@ Total Peak IOPS: ~506 IOPS
     - Notification service: send notifications to users before the event takes place, notification can be sent via email or SMS
     - Management service: manage the platform, users, and events. When admin makes changes via management console, these changes will be pushed to the actual service that owns the data. For example, when admin changes the event information, the change will be pushed to the event service.
 
-### API Design
-Booking APIs
-### Data model
+### API Design Sample
+This repo will focus on the API design for the booking service.
+#### Event related APIs
+
+| Method | Endpoint | Description | Request Body | Response |
+|--------|----------|-------------|--------------|-----------|
+| GET | `/api/events` | Get list of events | - | `{ "events": [...] }` |
+| GET | `/api/events/{id}` | Get event details | - | `{ "event": {...} }` |
+| POST | `/api/events` | Create new event | `{ "name": string, "date": date, "capacity": int }` | `{ "event": {...} }` |
+| PUT | `/api/events/{id}` | Update event | `{ "name": string, "date": date, "capacity": int }` | `{ "event": {...} }` |
+| DELETE | `/api/events/{id}` | Delete event | - | `{ "message": "success" }` |
+
+#### Booking related APIs
+
+| Method | Endpoint | Description | Request Body | Response |
+|--------|----------|-------------|--------------|-----------|
+| POST | `/api/bookings` | Create booking | `{ "event_id": int, "user_id": int, "tickets": int }` | `{ "booking": {...} }` |
+| GET | `/api/bookings/{id}` | Get booking details | - | `{ "booking": {...} }` |
+| GET | `/api/bookings/user/{user_id}` | Get user's bookings | - | `{ "bookings": [...] }` |
+| PUT | `/api/bookings/{id}/cancel` | Cancel booking | - | `{ "message": "success" }` |
+| GET | `/api/events/{id}/availability` | Check ticket availability | - | `{ "available": int }` |
+
+### Data model (Sample for this repo)
+This system will be read-heavy and write less frequently. This is because the number of users who visit the event page is much higher than the number of users actually booking tickets. Then relational database is a good choice for this system. NoSQL database are generally optimized for write-heavy systems.
+A relational database provides ACID that guarantees ACID properties, without ACID, it's not easy to prevent problems such as negative balance, double charge, double reservation, etc. 
+Schema of the database:
+![Data model](./docs/sample-db-design.png)
 
 ## Concurrency issues when booking tickets
